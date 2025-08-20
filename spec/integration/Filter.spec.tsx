@@ -62,4 +62,38 @@ describe('Список задач', () => {
 		const visibleItems = screen.getAllByRole('listitem')
 		expect(visibleItems).toHaveLength(2)
 	})
+	it('кнопка фильтра недоступна когда нет выполненных задач', async () => {
+		renderWithProviders(
+			<>
+				<NewTaskBar />
+				<TaskList />
+			</>
+		)
+
+		const inputEl = screen.getByRole('textbox')
+		const addBtnEl = screen.getByAltText(/Добавить/i)
+		const filterBtn = screen.getByTestId('filter-button')
+
+		expect(filterBtn).toBeDisabled()
+
+		await userEvent.type(inputEl, 'Активная задача')
+		await userEvent.click(addBtnEl)
+
+		expect(filterBtn).toBeDisabled()
+
+		await userEvent.type(inputEl, 'Еще одна активная задача')
+		await userEvent.click(addBtnEl)
+
+		expect(filterBtn).toBeDisabled()
+
+		const checkboxes = screen.getAllByRole('checkbox')
+		await userEvent.click(checkboxes[0])
+
+		expect(filterBtn).toBeEnabled()
+
+		await userEvent.click(filterBtn)
+
+		const visibleCheckboxes = screen.getAllByRole('checkbox')
+		expect(visibleCheckboxes).toHaveLength(1)
+	})
 })
